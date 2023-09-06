@@ -1,0 +1,12 @@
+feature_extractor
+safety_checker
+scheduler
+text_encoder
+tokenizer
+unet
+vae_decoder
+vae_encoder
+*.png
+*.jpg
+model_index.json
+__pycache__/
