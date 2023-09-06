@@ -21,6 +21,18 @@ https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/text2img
 
 
 
+# 从官方仓库拆分出unet来单独进行推理
+
+'''
+/Users/zhangyixin/Desktop/hackathon-google/stable-diffusion-v1-4_onnxruntime/diffusers/src/diffusers/pipelines/stable_diffusion/pipeline_onnx_stable_diffusion.py
+ 410 行             timestep = np.array([t], dtype=timestep_dtype)
+            noise_pred = self.unet(sample=latent_model_input, timestep=timestep, encoder_hidden_states=prompt_embeds)
+            noise_pred = noise_pred[0]
+单独作为一个模型进行推理
+输入是前面模型生成的latent_model_input和timestep
+输出 给到vae_decoder
+'''
+
 ---
 ---
 license: other
