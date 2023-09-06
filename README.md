@@ -1,7 +1,12 @@
 
 
 # stable-diffusion-v1-4_onnxruntime 环境配置如下:
-pip install diffusers==0.10.2 transformers scipy ftfy accelerate
+<!-- pip install diffusers==0.10.2 transformers scipy ftfy accelerate -->
+cd difffusers
+python setup.py deveop
+pip install -e .
+
+pip install  transformers scipy ftfy accelerate
 
 pip install onnxruntime
 
