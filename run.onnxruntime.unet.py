@@ -112,7 +112,7 @@ def decode_latents(subgraph, inputs, full_pipe):
     image = np.clip(image / 2 + 0.5, 0, 1)
     image = image.transpose((0, 2, 3, 1))
     image = numpy_to_pil(image)
-    
+
     return [image]
 
 
@@ -139,11 +139,7 @@ def dispatch(stage, subgraphs, inputs, full_pipe):
         if inputs == []:
             latents = np.load("latents.npy")
             inputs = [latents]
-        outputs = decode_latents(subgraph, inputs, full_pipe)
-        
-        img = outputs[0]
-        img.save(f"generated_image_mac_m1_sharding_result.png")
-        
+        outputs = decode_latents(subgraph, inputs, full_pipe)        
     
     # check outputs
     # TODO (yiakwy)
