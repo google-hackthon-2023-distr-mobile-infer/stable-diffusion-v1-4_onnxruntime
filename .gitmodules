@@ -1,0 +1,6 @@
+[submodule "stable-diffusion-v1-4"]
+	path = stable-diffusion-v1-4
+	url = https://huggingface.co/CompVis/stable-diffusion-v1-4
+[submodule "diffusers"]
+	path = diffusers
+	url = https://github.com/huggingface/diffusers.git
