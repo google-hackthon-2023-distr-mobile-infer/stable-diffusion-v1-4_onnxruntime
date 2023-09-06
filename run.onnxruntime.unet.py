@@ -183,7 +183,7 @@ def main():
 
         return prompt_embeds
     ############################################################
-    # prompt_embeds需要传给server
+    #手机上client prompt_embeds需要传给server
     ############################################################
     negative_prompt = None
     prompt_embeds = None
