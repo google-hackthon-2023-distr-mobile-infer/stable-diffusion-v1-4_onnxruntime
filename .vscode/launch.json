@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.onnxruntime.unet.py",
+            "cwd": "${workspaceFolder}/",
+            "args": [
+                "--cfg_file=${workspaceFolder}/tools/cfgs/waymo_models/pillar_center_seg.yaml",
+                // "--cfg_file=${workspaceFolder}/tools/cfgs/waymo_models/pillar_seg_unet.yaml",
+                // "--cfg_file=${workspaceFolder}/tools/cfgs/waymo_models/centerpoint_pillar_seg_unet_fpn.yaml",
+                "--batch_size=1",
+                "--epochs=5",
+                // "--data_path=${workspaceFolder}/data/waymo/test/",
+                // "--ckpt=${workspaceFolder}/tools/pre_trained/checkpoint_epoch_70.pth",
+                // "--ext=.npy",
+                // "--input_path=${workspaceFolder}/data/waymo/rosbag_in/",
+                // "--output_path=${workspaceFolder}/data/waymo/rosbag_out/",
+                // "--sample_file=${workspaceFolder}/data/chose.txt"
+            ],
+
+            "console": "integratedTerminal"
+        }
+    ]
+}

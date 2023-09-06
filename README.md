@@ -16,6 +16,8 @@ height=64, width=64
 image = pipe(prompt, num_inference_steps=num_inference_steps, height=64, width=64).images[0]
 
 # 拆分unet 出来单独进行推理
+https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/text2img
+
 
 
 

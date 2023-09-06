@@ -2,7 +2,9 @@ import os
 from diffusers import OnnxStableDiffusionPipeline, OnnxRuntimeModel
 from diffusers import DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler, DPMSolverMultistepScheduler
 from transformers import CLIPTextModel, CLIPTokenizer
- 
+ #https://huggingface.co/docs/diffusers/api/pipelines/stable_diffusion/text2img
+
+
 model_dir = "/Users/zhangyixin/Desktop/hackathon-google/stable-diffusion-v1-4_onnxruntime/"
  
 prompt = "a photo of an astronaut riding a horse on mars"
@@ -40,4 +42,7 @@ pipe = OnnxStableDiffusionPipeline(
  
 image = pipe(prompt, num_inference_steps=num_inference_steps, height=64, width=64).images[0]
  
-image.save(f"generated_image_mac_m1.png")
+# image = pipe(prompt, num_inference_steps=num_inference_steps, height=1024, width=1024).images[0]
+
+
+image.save(f"generated_image_mac_m1122.png")
