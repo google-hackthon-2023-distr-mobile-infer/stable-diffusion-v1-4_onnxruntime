@@ -67,8 +67,8 @@ def check_inputs(
 #把以下的代码写到main 函数里 
 def main():
     num_inference_steps = 20
-    height=64
-    width=64
+    height=512
+    width=512
     ########################################################################################################################
     # 手机和嵌入上上跑tokenizer，text_encoder，vae_decoder
     scheduler = PNDMScheduler.from_pretrained(os.path.join(model_dir, "scheduler/scheduler_config.json"))
