@@ -81,8 +81,8 @@ def main():
 
     #放到了3060gpu服务器上？
     # 这里循环20次 ，encoder 会参与吗？
-    unet = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "unet/model.onnx")))
-    
+    # unet = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "unet/model.onnx")))
+    unet = None
     #  image = pipe(prompt, guidance_scale=7.5, num_inference_steps=15, generator=generator).images[0]
     #第一个手机端的pipe
     pipe = OnnxStableDiffusionPipeline(
@@ -96,33 +96,11 @@ def main():
         feature_extractor=None,
         requires_safety_checker=False,
     )
-    # 只为测试使用
-    image = pipe(prompt, num_inference_steps=num_inference_steps, height=height, width=width).images[0] 
-    # # image = pipe(prompt, num_inference_steps=num_inference_steps, height=1024, width=1024).images[0]
-    image.save(f"generated_image_--11111111111111.png")
+    # # 只为测试使用
+    # image = pipe(prompt, num_inference_steps=num_inference_steps, height=height, width=width).images[0] 
+    # # # image = pipe(prompt, num_inference_steps=num_inference_steps, height=1024, width=1024).images[0]
+    # image.save(f"generated_image_--11111111111111.png")
 
-    ########################################################################################################################
-    # 服务器上跑unet，是3060笔记本，
-    # 构建第二个pipe2 ,使用原来的配置，不用第一个pipe里的unet ；
-    #用第二个pipe2 的unet 进行网络推理
-    scheduler2 = PNDMScheduler.from_pretrained(os.path.join(model_dir, "scheduler/scheduler_config.json"))
-    tokenizer2 = CLIPTokenizer.from_pretrained(model_dir, subfolder="tokenizer")
-    text_encoder2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "text_encoder/model.onnx")))
-    vae_decoder2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "vae_decoder/model.onnx")))
-    unet2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "unet/model.onnx")))
-    pipe2 = OnnxStableDiffusionPipeline(
-        vae_encoder=None,
-        vae_decoder=vae_decoder2,
-        text_encoder=text_encoder2,
-        tokenizer=tokenizer2,
-        unet=unet2,
-        scheduler=scheduler2,
-        safety_checker=None,
-        feature_extractor=None,
-        requires_safety_checker=False,
-    )
-
-    ########################################################################################################################
     #需要接收 手机上 生成的prompt，tokenizer，text_encoder
     def _encode_prompt(
         prompt: Union[str, List[str]],
@@ -204,27 +182,51 @@ def main():
             prompt_embeds = np.concatenate([negative_prompt_embeds, prompt_embeds])
 
         return prompt_embeds
-    
-
-    ########################################################################################################################
-    num_inference_steps=num_inference_steps
-    # height = 64
-    # width = 64
-    callback_steps = 1
+    ############################################################
+    # prompt_embeds需要传给server
+    ############################################################
     negative_prompt = None
     prompt_embeds = None
     negative_prompt_embeds = None
-    # check_inputs(
-    #     prompt, height, width, callback_steps, negative_prompt, prompt_embeds, negative_prompt_embeds
-    # )
+    num_images_per_prompt = 1
+    do_classifier_free_guidance = True
+    prompt_embeds = _encode_prompt(
+        prompt,
+        num_images_per_prompt,
+        do_classifier_free_guidance,
+        negative_prompt,
+        prompt_embeds=prompt_embeds,
+        negative_prompt_embeds=negative_prompt_embeds,
+    )
+
+    ########################################################################################################################
+    # 服务器上跑unet，是3060笔记本，
+    # 构建第二个pipe2 ,使用原来的配置，不用第一个pipe里的unet ；
+    #用第二个pipe2 的unet 进行网络推理
+    scheduler2 = PNDMScheduler.from_pretrained(os.path.join(model_dir, "scheduler/scheduler_config.json"))
+    tokenizer2 = CLIPTokenizer.from_pretrained(model_dir, subfolder="tokenizer")
+    text_encoder2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "text_encoder/model.onnx")))
+    vae_decoder2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "vae_decoder/model.onnx")))
+    unet2 = OnnxRuntimeModel(model=OnnxRuntimeModel.load_model(os.path.join(model_dir, "unet/model.onnx")))
+    pipe2 = OnnxStableDiffusionPipeline(
+        vae_encoder=None,
+        vae_decoder=vae_decoder2,
+        text_encoder=text_encoder2,
+        tokenizer=tokenizer2,
+        unet=unet2,
+        scheduler=scheduler2,
+        safety_checker=None,
+        feature_extractor=None,
+        requires_safety_checker=False,
+    )
+
+    ########################################################################################################################
+    #server 上跑unet
+    ########################################################################################################################
+    num_inference_steps=num_inference_steps
 
     # define call parameters
-    if prompt is not None and isinstance(prompt, str):
-        batch_size = 1
-    elif prompt is not None and isinstance(prompt, list):
-        batch_size = len(prompt)
-    else:
-        batch_size = prompt_embeds.shape[0]
+    batch_size = 1
 
     generator = np.random
 
@@ -235,16 +237,6 @@ def main():
     num_images_per_prompt = 1
 
 
-    #需要接收 手机上 生成的prompt，tokenizer，text_encoder
-    prompt_embeds = _encode_prompt(
-        prompt,
-        num_images_per_prompt,
-        do_classifier_free_guidance,
-        negative_prompt,
-        prompt_embeds=prompt_embeds,
-        negative_prompt_embeds=negative_prompt_embeds,
-    )
-
     # get the initial random noise unless the user supplied it
     latents_dtype = prompt_embeds.dtype
     latents_shape = (batch_size * num_images_per_prompt, 4, height // 8, width // 8)
@@ -252,9 +244,9 @@ def main():
     latents = generator.randn(*latents_shape).astype(latents_dtype)
 
     # set timesteps
-    pipe.scheduler.set_timesteps(num_inference_steps)
+    pipe2.scheduler.set_timesteps(num_inference_steps)
 
-    latents = latents * np.float64(pipe.scheduler.init_noise_sigma)
+    latents = latents * np.float64(pipe2.scheduler.init_noise_sigma)
 
     # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
     # eta (η) is only used with the DDIMScheduler, it will be ignored for other schedulers.
@@ -284,10 +276,10 @@ def main():
     #tensor(int64)
     timestep_dtype = ORT_TO_NP_TYPE[timestep_dtype]
 
-    for i, t in enumerate(tqdm(pipe.scheduler.timesteps)):
+    for i, t in enumerate(tqdm(pipe2.scheduler.timesteps)):
         # expand the latents if we are doing classifier free guidance
         latent_model_input = np.concatenate([latents] * 2) if do_classifier_free_guidance else latents
-        latent_model_input = pipe.scheduler.scale_model_input(torch.from_numpy(latent_model_input), t)
+        latent_model_input = pipe2.scheduler.scale_model_input(torch.from_numpy(latent_model_input), t)
         latent_model_input = latent_model_input.cpu().numpy()
 
         # predict the noise residual
@@ -301,12 +293,15 @@ def main():
             noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
         # compute the previous noisy sample x_t -> x_t-1
-        scheduler_output = pipe.scheduler.step(
+        scheduler_output = pipe2.scheduler.step(
             torch.from_numpy(noise_pred), t, torch.from_numpy(latents), **extra_step_kwargs
         )
         latents = scheduler_output.prev_sample.numpy()
 
     latents = 1 / 0.18215 * latents
+    ############################################################
+    # server 把latents 传输给 手机 client 进行decode 显示生成的图片
+    ############################################################
     # image = self.vae_decoder(latent_sample=latents)[0]
     # it seems likes there is a strange result for using half-precision vae decoder if batchsize>1
     image = np.concatenate(
@@ -315,11 +310,8 @@ def main():
 
     image = np.clip(image / 2 + 0.5, 0, 1)
     image = image.transpose((0, 2, 3, 1))
-    # from /Users/zhangyixin/Desktop/hackathon-google/stable-diffusion-v1-4_onnxruntime/diffusers/src/diffusers/utils/pil_utils.py
     image = numpy_to_pil(image)
-    has_nsfw_concept = None
-
-    image[0].save(f"generated_image_mac_unet--2222222222.png")
+    image[0].save(f"andriod-generated_image_11111.png")
 
 
 
