@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/run.onnxruntime.unet.py",
+            "program": "${workspaceFolder}/run_onnxruntime_unet.py",
             "cwd": "${workspaceFolder}/",
             "args": [
                 "--cfg_file=${workspaceFolder}/tools/cfgs/waymo_models/pillar_center_seg.yaml",
