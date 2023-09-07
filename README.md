@@ -1,4 +1,6 @@
-# stable-diffusion-v1-4_onnxruntime 环境配置如下:
+# stable-diffusion-v1-4_onnxruntime
+
+![arc](assets/distributed_mobile_inference.drawio.png)
 
 ## Preparation
 
@@ -63,4 +65,4 @@ start demo
 python run.onnxruntime.py
 ```
 
-![example](/assets/example.png)
+![example](assets/example.png)
