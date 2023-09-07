@@ -1,6 +1,9 @@
 import requests
 
-base_url = 'http://localhost:5000'
+# base_url = 'http://localhost:5000'
+# base_url = 'http://192.168.31.243:5000'
+base_url = 'http://192.168.31.126:15000'
+
 node_id = None
 task_id = None
 local_algo_type = 'tokenize'
