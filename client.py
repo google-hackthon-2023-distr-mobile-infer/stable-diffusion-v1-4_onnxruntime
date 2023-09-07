@@ -29,10 +29,10 @@ last_algo_part_map = {
 }
 # 获取待使用的输入
 def get_task_input(algo_part_type):
-    global task_id
+    global task_id, node_id
     r = requests.post(f'{base_url}/receive_task', json={
         "node_id": node_id,
-        "algo_part": local_algo_type
+        "algo_part": algo_part_type
     })
     print(r.json())
     j = r.json()
@@ -44,7 +44,7 @@ def get_task_input(algo_part_type):
     task_id = j['task_id']
     last_algo_part = last_algo_part_map[algo_part_type]
     if last_algo_part:
-        return algo_part_output[algo_part_type]
+        return algo_part_output[last_algo_part]
     return querys
 
 # 提交任务结果
