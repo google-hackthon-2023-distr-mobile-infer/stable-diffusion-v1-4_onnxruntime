@@ -1,0 +1,6 @@
+transformers 
+scipy 
+ftfy 
+accelerate
+onnx
+onnxruntime
